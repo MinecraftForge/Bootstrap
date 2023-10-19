@@ -1,27 +1,26 @@
+import net.minecraftforge.gradleutils.PomUtils
+
 plugins {
-    id 'net.minecraftforge.gradleutils' version '2.+'
-    id 'com.github.ben-manes.versions' version '0.39.0'
-    id 'org.javamodularity.moduleplugin' version '1.8.10'
+    id 'org.cadixdev.licenser' version '0.6.1'
+    id 'net.minecraftforge.gradleutils' version '[2.1.2,)'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
     id 'java-library'
     id 'maven-publish'
     id 'eclipse'
 }
 
-group 'cpw.mods'
-
-version = gradleutils.getTagOffsetVersion()
-logger.lifecycle("Version: $version")
+group 'net.minecraftforge'
+version = gradleutils.tagOffsetVersion
+println("Version: $version")
 
 repositories {
+    mavenCentral()
+    maven gradleutils.forgeMaven
     mavenLocal()
-    maven {
-        name 'forge'
-        url 'https://maven.minecraftforge.net/'
-    }
 }
 
 dependencies {
-    implementation('cpw.mods:securejarhandler:2.1.2')
+    implementation('net.minecraftforge:securemodules:2.2.2')
 }
 
 java {
@@ -29,59 +28,51 @@ java {
     withSourcesJar()
 }
 
+license {
+    header = file("LICENSE-header.txt")
+    newLine = false
+}
+
 changelog {
     fromTag "0.1"
 }
 
 jar {
-    //noinspection UnnecessaryQualifiedReference
-    manifest.attributes(
-            'Specification-Title': 'bootstraplauncher',
-            'Specification-Vendor': 'forge',
-            'Specification-Version': '1', // We are version 1 of ourselves
-            'Implementation-Title': project.name,
-            'Implementation-Version': "${project.version}+${System.getenv("BUILD_NUMBER") ?: 0}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
-            'Implementation-Vendor': 'forge',
-            'Implementation-Timestamp': java.time.Instant.now().toString(),
-            'Git-Commit': gradleutils.gitInfo.abbreviatedId,
-            'Git-Branch': gradleutils.gitInfo.branch,
-            'Build-Number': "${System.getenv("BUILD_NUMBER") ?: 0}",
-            'Main-Class': 'cpw.mods.bootstraplauncher.BootstrapLauncher'
-    )
-}
-
-artifacts {
-    archives jar
-    archives sourcesJar
+    manifest.attributes([
+        'Specification-Title':  'bootstraplauncher',
+        'Specification-Vendor':  'Forge Development LLC',
+        'Specification-Version': '1',
+        'Implementation-Title':   project.name,
+        'Implementation-Vendor': 'Forge Development LLC',
+        'Implementation-Version': project.version,
+        'Main-Class':            'net.minecraftforge.bootstrap.BootstrapLauncher'
+    ] as java.util.LinkedHashMap, 'net/minecraftforge/bootstrap/')
 }
 
 publishing {
     publications.register('mavenJava', MavenPublication) {
         from components.java
+        artifactId = 'bootstrap'
         pom {
-            name = 'Bootstrap launcher'
-            description = 'Allows bootstrapping a modularized environment from a classpath one'
-            url = 'https://github.com/McModLauncher/bootstraplauncher'
-            scm {
-                url = 'https://github.com/McModLauncher/bootstraplauncher'
-                connection = 'scm:git:git@github.com:McModLauncher/bootstraplauncher.git'
-                developerConnection = 'scm:git:git@github.com:McModLauncher/bootstraplauncher.git'
-            }
-            issueManagement {
-                system = 'github'
-                url = 'https://github.com/McModLauncher/bootstraplauncher/issues'
-            }
+            name = 'Bootstrap'
+            description = 'Allows bootstrapping a modularized environment from a classpath one, the intention is for this to be a project where we can bootstrap many different environements of Forge.'
+            url = 'https://github.com/MinecraftForge/Bootstrap'
+            PomUtils.setGitHubDetails(pom, 'Bootstrap')
+            license PomUtils.Licenses.LGPLv3
+            
             developers {
-                developer {
-                    id = 'cpw'
-                    name = 'cpw'
-                }
+                developer PomUtils.Developers.cpw
+                developer PomUtils.Developers.LexManos
             }
         }
     }
     repositories {
-        maven gradleutils.getPublishingForgeMaven()
+        maven gradleutils.publishingForgeMaven
     }
 }
 
-
+// Hack eclipse into knowing that the gradle deps are modules
+eclipse.classpath {
+    containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
+    file.whenMerged { entries.findAll { it.kind == 'lib' || it.path == 'org.eclipse.buildship.core.gradleclasspathcontainer' }.each { it.entryAttributes['module'] = 'true' } }
+}

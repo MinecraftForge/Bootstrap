@@ -1,10 +1,25 @@
-# Project exclude paths
-/.gradle/
-/build/
-/build/classes/java/main/
-/.idea/
-/.settings/
-/bin/
-/.classpath
-/.project
+#eclipse
+**/bin
+**/.settings
+**/.classpath
+**/.project
+**/.factorypath
+**/.apt_generated
+
+#idea
+/.idea
+/*/out
+/classes
+*.iml
+
+# We however WANT the ide folder as it has tempaltes/configs for developing Forge.
+!ide/**
+
+#gradle
+/build
+/.gradle
+/*/build
+/*/.gradle
+
+#occupational hazards
 /repo/

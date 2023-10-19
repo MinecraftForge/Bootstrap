@@ -1,27 +1,12 @@
 /*
- * BootstrapLauncher - for launching Java programs with added modular fun!
- *
- *     Copyright (C) 2021 - cpw
- *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Lesser General Public License as published by
- *     the Free Software Foundation, version 3 of the License.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Lesser General Public License for more details.
- *
- *     You should have received a copy of the GNU Lesser General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (c) Forge Development LLC
+ * SPDX-License-Identifier: LGPL-3.0-only
  */
+package net.minecraftforge.bootstrap;
 
-package cpw.mods.bootstraplauncher;
-
-import cpw.mods.cl.JarModuleFinder;
-import cpw.mods.cl.ModularURLHandler;
 import cpw.mods.cl.ModuleClassLoader;
 import cpw.mods.jarhandling.SecureJar;
+import net.minecraftforge.securemodules.SecureModuleFinder;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,7 +100,7 @@ public class BootstrapLauncher {
         // Gather all the module names from the SecureJars
         var allTargets = Arrays.stream(secureJarsArray).map(SecureJar::name).toList();
         // Creates a module finder which uses the list of SecureJars to find modules from
-        var jarModuleFinder = JarModuleFinder.of(secureJarsArray);
+        var jarModuleFinder = SecureModuleFinder.of(secureJarsArray);
         // Retrieve the boot layer's configuration
         var bootModuleConfiguration = ModuleLayer.boot().configuration();
 
