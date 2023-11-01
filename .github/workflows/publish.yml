@@ -13,7 +13,7 @@ jobs:
     with:
       java: 17
       gradle_tasks: "publish"
-      artifact_name: "bootstrap"
+      artifact_names: "bootstrap,bootstrap-api,bootstrap-shim"
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       PROMOTE_ARTIFACT_WEBHOOK: ${{ secrets.PROMOTE_ARTIFACT_WEBHOOK }}

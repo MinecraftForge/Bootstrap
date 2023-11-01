@@ -3,15 +3,14 @@ import net.minecraftforge.gradleutils.PomUtils
 plugins {
     id 'org.cadixdev.licenser' version '0.6.1'
     id 'net.minecraftforge.gradleutils' version '[2.1.2,)'
-    id 'org.javamodularity.moduleplugin' version '1.8.12'
     id 'java-library'
     id 'maven-publish'
     id 'eclipse'
 }
 
+gradleutils.gitRoot = rootProject.layout.projectDirectory
 group 'net.minecraftforge'
 version = gradleutils.tagOffsetVersion
-println("Version: $version")
 
 repositories {
     mavenCentral()
@@ -19,42 +18,43 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.unsafe)
-    implementation(libs.securemodules)
-    implementation(project(':bs-api'))
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(16)
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
     withSourcesJar()
 }
 
 license {
-    header = file("LICENSE-header.txt")
+    header = rootProject.file("LICENSE-header.txt")
     newLine = false
 }
 
 jar {
     manifest.attributes([
-        'Specification-Title':   'BootStrap',
+        'Automatic-Module-Name': 'net.minecraftforge.bootstrap.shim',
+        'Main-Class':            'net.minecraftforge.bootstrap.shim.Main'
+    ] as java.util.LinkedHashMap)
+    manifest.attributes([
+        'Specification-Title':   'BootStrap-Shim',
         'Specification-Vendor':  'Forge Development LLC',
         'Specification-Version':  gradleutils.gitInfo.tag,
         'Implementation-Title':   project.name,
         'Implementation-Vendor': 'Forge Development LLC',
         'Implementation-Version': project.version
-    ] as java.util.LinkedHashMap, 'net/minecraftforge/bootstrap/')
+    ] as java.util.LinkedHashMap, 'net/minecraftforge/bootstrap/shim/')
 }
 
 publishing {
     publications.register('mavenJava', MavenPublication) {
         from components.java
-        artifactId = 'bootstrap'
+        artifactId = 'bootstrap-shim'
         pom {
-            name = 'Bootstrap'
-            description = 'Allows bootstrapping a modularized environment from a classpath one, the intention is for this to be a project where we can bootstrap many different environements of Forge.'
+            name = 'Bootstrap-shim'
+            description = 'A executable shim that initalizes Bootstrap. Compatible with java 8 we we can display a nice error.'
             url = 'https://github.com/MinecraftForge/Bootstrap'
             PomUtils.setGitHubDetails(pom, 'Bootstrap')
-            license PomUtils.Licenses.LGPLv3
+            license PomUtils.Licenses.LGPLv2_1
 
             developers {
                 developer PomUtils.Developers.LexManos
@@ -64,10 +64,4 @@ publishing {
     repositories {
         maven gradleutils.publishingForgeMaven
     }
-}
-
-// Hack eclipse into knowing that the gradle deps are modules
-eclipse.classpath {
-    containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
-    file.whenMerged { entries.findAll { it.kind == 'lib' || it.path == 'org.eclipse.buildship.core.gradleclasspathcontainer' }.each { it.entryAttributes['module'] = 'true' } }
 }
