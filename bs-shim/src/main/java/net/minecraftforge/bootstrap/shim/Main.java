@@ -59,7 +59,7 @@ public class Main {
 
         int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
         int currentJavaVersion = getJavaVersion();
-        if (wantedJavaVersion < currentJavaVersion)
+        if (wantedJavaVersion > currentJavaVersion)
             throw new IllegalStateException("Current java is " + System.getProperty("java.version") + " but we require atleast " + wantedJavaVersion);
 
         String mainClass = props.getProperty("Main-Class");
