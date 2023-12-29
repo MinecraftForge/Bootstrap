@@ -21,6 +21,19 @@ import java.util.Properties;
 public class Main {
     private static final boolean DEBUG = Boolean.getBoolean("bss.debug");
     public static void main(String[] args) throws Exception {
+        Properties props = new Properties();
+        try (InputStream stream = getStream("bootstrap-shim.properties")) {
+            props.load(stream);
+        }
+
+        int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
+        int currentJavaVersion = getJavaVersion();
+        if (wantedJavaVersion > currentJavaVersion)
+            throw new IllegalStateException("Current Java is " + System.getProperty("java.version") + " but we require at least " + wantedJavaVersion);
+
+        if (args.length > 0 && args[0].equals("--onlyCheckJava"))
+            System.exit(0);
+
         boolean failed = false;
         List<URL> urls = new ArrayList<>();
         StringBuilder classpath = new StringBuilder(System.getProperty("java.class.path"));
@@ -51,16 +64,6 @@ public class Main {
 
         if (failed)
             throw new IllegalStateException("Missing required libraries! Check log");
-
-        Properties props = new Properties();
-        try (InputStream stream = getStream("bootstrap-shim.properties")) {
-            props.load(stream);
-        }
-
-        int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
-        int currentJavaVersion = getJavaVersion();
-        if (wantedJavaVersion > currentJavaVersion)
-            throw new IllegalStateException("Current java is " + System.getProperty("java.version") + " but we require atleast " + wantedJavaVersion);
 
         String mainClass = props.getProperty("Main-Class");
         if (mainClass == null)
