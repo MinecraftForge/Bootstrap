@@ -65,8 +65,7 @@ class ClassPathHelper {
                 if ("default".equals(sourceset))
                     continue;
 
-                var parent1 = getParent(1, path);
-                if ("bin".equals(parent1)) {
+                if ("bin".equals(getParent(1, path))) {
                     /*
                      * Eclipse shoves both classes and resources into the same folder
                      *   forge\bin\main
@@ -74,7 +73,7 @@ class ClassPathHelper {
                      *   forge\bin\default
                      */
                     prj = getProjectName(2, path);
-                } else if ("resources".equals(parent1)) {
+                } else if ("resources".equals(getParent(1, path))) {
                     /*
                      * IntelliJ/Gradle resources:
                      *   forge\build\resources\main
