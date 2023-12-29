@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Properties;
 
 public class Main {
-    static final boolean DEBUG = Boolean.getBoolean("bss.debug");
+    private static final boolean DEBUG = Boolean.getBoolean("bss.debug");
     public static void main(String[] args) throws Exception {
         boolean failed = false;
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         StringBuilder classpath = new StringBuilder(System.getProperty("java.class.path"));
 
         try (
@@ -109,7 +109,7 @@ public class Main {
 
     private static int getJavaVersion() {
         String version = System.getProperty("java.version");
-        if (version.startsWith("1."))  // Pre Java 9 they all started with 1.
+        if (version.startsWith("1."))  // Pre-Java 9 they all started with "1."
             version = version.substring(2);
 
         int dot = version.indexOf(".");
@@ -119,13 +119,13 @@ public class Main {
         return Integer.parseInt(version);
     }
 
-    private static class ListEntry {
+    private static final class ListEntry {
         private final String sha256;
         //private final String id;
         private final String path;
 
         private static ListEntry from(String line) {
-            String[] parts = line.split("\t");
+            String[] parts = line.split("\t", 3);
             return new ListEntry(parts[0], parts[1], parts[2]);
         }
 
