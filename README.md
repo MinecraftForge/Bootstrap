@@ -45,6 +45,10 @@ BSL creates a new module layer which has the following properties:
 For easier debugging, additional debugging information is printed to `System.out` if the `bsl.debug` system property is
 defined (regardless of its actual value).
 
+## CLI args
+The shim jar accepts the following arguments:
+- `--onlyCheckJava`: If specified, the shim will exit with success code 0 if the Java check passes rather than continuing to launch.
+
 [path_separator]: https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/io/File.html#pathSeparatorChar
 [modlauncher]: https://github.com/MinecraftForge/ModLauncher
 [bootmodule]: https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/ModuleLayer.html#boot()

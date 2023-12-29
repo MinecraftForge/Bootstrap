@@ -34,7 +34,7 @@ license {
     newLine = false
 }
 
-jar {
+tasks.named('jar', Jar) {
     manifest.attributes([
         'Specification-Title':   'BootStrap',
         'Specification-Vendor':  'Forge Development LLC',
@@ -51,7 +51,7 @@ publishing {
         artifactId = 'bootstrap'
         pom {
             name = 'Bootstrap'
-            description = 'Allows bootstrapping a modularized environment from a classpath one, the intention is for this to be a project where we can bootstrap many different environements of Forge.'
+            description = 'Allows bootstrapping a modularized environment from a classpath one, the intention is for this to be a project where we can bootstrap many different environments of Forge.'
             url = 'https://github.com/MinecraftForge/Bootstrap'
             PomUtils.setGitHubDetails(pom, 'Bootstrap')
             license PomUtils.Licenses.LGPLv3

@@ -30,7 +30,7 @@ license {
     newLine = false
 }
 
-jar {
+tasks.named('jar', Jar) {
     manifest.attributes([
         'Automatic-Module-Name': 'net.minecraftforge.bootstrap.shim',
         'Main-Class':            'net.minecraftforge.bootstrap.shim.Main'

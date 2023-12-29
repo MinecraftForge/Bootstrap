@@ -19,10 +19,23 @@ import java.util.List;
 import java.util.Properties;
 
 public class Main {
-    static final boolean DEBUG = Boolean.getBoolean("bss.debug");
+    private static final boolean DEBUG = Boolean.getBoolean("bss.debug");
     public static void main(String[] args) throws Exception {
+        Properties props = new Properties();
+        try (InputStream stream = getStream("bootstrap-shim.properties")) {
+            props.load(stream);
+        }
+
+        int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
+        int currentJavaVersion = getJavaVersion();
+        if (wantedJavaVersion > currentJavaVersion)
+            throw new IllegalStateException("Current Java is " + System.getProperty("java.version") + " but we require at least " + wantedJavaVersion);
+
+        if (args.length > 0 && args[0].equals("--onlyCheckJava"))
+            System.exit(0);
+
         boolean failed = false;
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         StringBuilder classpath = new StringBuilder(System.getProperty("java.class.path"));
 
         try (
@@ -51,16 +64,6 @@ public class Main {
 
         if (failed)
             throw new IllegalStateException("Missing required libraries! Check log");
-
-        Properties props = new Properties();
-        try (InputStream stream = getStream("bootstrap-shim.properties")) {
-            props.load(stream);
-        }
-
-        int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
-        int currentJavaVersion = getJavaVersion();
-        if (wantedJavaVersion > currentJavaVersion)
-            throw new IllegalStateException("Current java is " + System.getProperty("java.version") + " but we require atleast " + wantedJavaVersion);
 
         String mainClass = props.getProperty("Main-Class");
         if (mainClass == null)
@@ -109,7 +112,7 @@ public class Main {
 
     private static int getJavaVersion() {
         String version = System.getProperty("java.version");
-        if (version.startsWith("1."))  // Pre Java 9 they all started with 1.
+        if (version.startsWith("1."))  // Pre-Java 9 they all started with "1."
             version = version.substring(2);
 
         int dot = version.indexOf(".");
@@ -119,13 +122,13 @@ public class Main {
         return Integer.parseInt(version);
     }
 
-    private static class ListEntry {
+    private static final class ListEntry {
         private final String sha256;
         //private final String id;
         private final String path;
 
         private static ListEntry from(String line) {
-            String[] parts = line.split("\t");
+            String[] parts = line.split("\t", 3);
             return new ListEntry(parts[0], parts[1], parts[2]);
         }
 

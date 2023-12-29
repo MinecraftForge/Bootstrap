@@ -89,7 +89,7 @@ class ClassPathHelper {
                     prj = getProjectName(4, path);
                 }
 
-                if (prj != null && sourceset != null) {
+                if (prj != null) {
                     //if (DEBUG) log("Found Project `" + prj + "` SourceSet `" + sourceset + "` Directory: " + path);
                     var lst = sourcesets
                         .computeIfAbsent(prj, n -> new HashMap<>())
@@ -164,7 +164,7 @@ class ClassPathHelper {
         var jars = new TreeMap<String, SecureJar>();
         for (var info : modules.values()) {
             var paths = new ArrayList<Path>(info.paths.size());
-            info.paths.forEach(paths::add);
+            paths.addAll(info.paths);
             Collections.reverse(paths); // Securejar is last win instead of first win like the classpath
             /*
             var debug = DEBUG && paths.size() > 1;
@@ -175,7 +175,7 @@ class ClassPathHelper {
             }
             */
 
-            var securejar = SecureJar.from(jar -> getMetadata(jar, info), paths.stream().toArray(Path[]::new));
+            var securejar = SecureJar.from(jar -> getMetadata(jar, info), paths.toArray(Path[]::new));
             jars.put(securejar.moduleDataProvider().name(), securejar);
 
             /*
