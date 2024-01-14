@@ -245,7 +245,10 @@ class ClassPathHelper {
             if (parent == null)
                 return null;
         }
-        return parent == null ? null : parent.getFileName().toString();
+        if (parent == null) return null;
+        var fileName = parent.getFileName();
+        if (fileName == null) return null;
+        return fileName.toString();
     }
 
     private static String getProjectName(int levels, Path path) {
