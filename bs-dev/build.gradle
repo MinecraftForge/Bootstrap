@@ -9,9 +9,9 @@ plugins {
     id 'eclipse'
 }
 
+gradleutils.gitRoot = rootProject.layout.projectDirectory
 group 'net.minecraftforge'
 version = gradleutils.tagOffsetVersion
-println("Version: $version")
 
 repositories {
     mavenCentral()
@@ -19,9 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.unsafe)
-    implementation(libs.securemodules)
-    implementation(project(':bs-api'))
+    implementation project(':bs-api')
 }
 
 java {
@@ -30,31 +28,31 @@ java {
 }
 
 license {
-    header = file("LICENSE-header.txt")
+    header = rootProject.file("LICENSE-header.txt")
     newLine = false
 }
 
-tasks.named('jar', Jar) {
+jar {
     manifest.attributes([
-        'Specification-Title':   'BootStrap',
+        'Specification-Title':   'BootStrap-DEV',
         'Specification-Vendor':  'Forge Development LLC',
         'Specification-Version':  gradleutils.gitInfo.tag,
         'Implementation-Title':   project.name,
         'Implementation-Vendor': 'Forge Development LLC',
         'Implementation-Version': project.version
-    ] as java.util.LinkedHashMap, 'net/minecraftforge/bootstrap/')
+    ] as java.util.LinkedHashMap, 'net/minecraftforge/bootstrap/dev/')
 }
 
 publishing {
     publications.register('mavenJava', MavenPublication) {
         from components.java
-        artifactId = 'bootstrap'
+        artifactId = 'bootstrap-dev'
         pom {
-            name = 'Bootstrap'
-            description = 'Allows bootstrapping a modularized environment from a classpath one, the intention is for this to be a project where we can bootstrap many different environments of Forge.'
+            name = 'Bootstrap-Dev'
+            description = 'Dev jar for https://github.com/MinecraftForge/Bootstrap'
             url = 'https://github.com/MinecraftForge/Bootstrap'
             PomUtils.setGitHubDetails(pom, 'Bootstrap')
-            license PomUtils.Licenses.LGPLv3
+            license PomUtils.Licenses.LGPLv2_1
 
             developers {
                 developer PomUtils.Developers.LexManos

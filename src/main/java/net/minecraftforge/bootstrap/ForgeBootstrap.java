@@ -4,6 +4,7 @@
  */
 package net.minecraftforge.bootstrap;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -19,34 +20,39 @@ public class ForgeBootstrap extends Bootstrap {
     }
 
     @Override
-    protected List<SecureJar> selectRuntimeModules(List<SecureJar> classpath) {
+    protected List<SecureJar> selectRuntimeModules(List<Path[]> classpath) {
+        var jars = new ArrayList<SecureJar>(classpath.size());
+        for (var paths : classpath)
+            jars.add(secureJar(paths));
+
         var ret = new ArrayList<SecureJar>();
         var bootlayer = getClass().getModule().getLayer();
-        var width = classpath.stream().mapToInt(p -> p.moduleDataProvider().name().length()).max().orElse(0) + 1;
+        var width = jars.stream().mapToInt(j -> j.moduleDataProvider().name().length()).max().orElse(0) + 1;
 
         if (DEBUG) log("Found classpath:");
-        for (var securejar : classpath) {
-            // If it's a mod we'll find it later
-            var meta = securejar.moduleDataProvider();
-            if (meta.findFile(MODS_TOML).isPresent() ||
-                meta.findFile(MINECRAFT).isPresent() ||
-                meta.getManifest().getMainAttributes().getValue(MOD_TYPE) != null) {
-                if (DEBUG) log("  ModFile:   " + pad(width, meta.name()) + securejar.getPrimaryPath());
+        for (int x = 0; x < classpath.size(); x++) {
+            var jar = jars.get(x);
+            var name = jar.moduleDataProvider().name();
+            var paths = classpath.get(x);
+
+            if (bootlayer.findModule(name).isPresent()) {
+                log("  Bootstrap: ", width, name, paths);
                 continue;
             }
 
-            if (bootlayer.findModule(meta.name()).isEmpty()) {
-                if (DEBUG) log("  Module:    " + pad(width, meta.name()) + securejar.getPrimaryPath());
-                ret.add(securejar);
-            } else {
-                if (DEBUG) log("  Bootstrap: " + pad(width, meta.name()) + securejar.getPrimaryPath());
+            // If it's a mod we'll find it later
+            var meta = jar.moduleDataProvider();
+            if (meta.findFile(MODS_TOML).isPresent() ||
+                meta.findFile(MINECRAFT).isPresent() ||
+                meta.getManifest().getMainAttributes().getValue(MOD_TYPE) != null) {
+                log("  ModFile:   ", width, name, paths);
+                continue;
             }
+
+            log("  Module:    ", width, name, paths);
+            ret.add(jar);
         }
 
         return ret;
-    }
-
-    private static String pad(int width, String str) {
-        return str + " ".repeat(width - str.length());
     }
 }

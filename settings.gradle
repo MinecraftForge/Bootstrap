@@ -27,4 +27,5 @@ dependencyResolutionManagement {
 
 rootProject.name = 'Bootstrap'
 include 'bs-api'
+include 'bs-dev'
 include 'bs-shim'
