@@ -8,6 +8,8 @@ module net.minecraftforge.bootstrap {
     exports net.minecraftforge.bootstrap;
 
     requires net.minecraftforge.bootstrap.api;
-	requires net.minecraftforge.unsafe;
+    requires net.minecraftforge.unsafe;
+
     uses net.minecraftforge.bootstrap.api.BootstrapEntryPoint;
+    uses net.minecraftforge.bootstrap.api.BootstrapClasspathModifier;
 }
