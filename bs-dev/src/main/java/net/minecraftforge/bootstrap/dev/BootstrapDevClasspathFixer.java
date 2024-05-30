@@ -89,10 +89,12 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
 
         // Remove any entries that are only a single path, no need to merge them
         map.values().removeIf(paths -> paths.size() <= 1);
-//        for (var itr  = map.values().iterator(); itr.hasNext(); ) {
-//            if (itr.next().size() <= 1)
-//                itr.remove();
-//        }
+        /*
+        for (var itr  = map.values().iterator(); itr.hasNext(); ) {
+            if (itr.next().size() <= 1)
+                itr.remove();
+        }
+        */
 
         // No explicit paths set, so nope out
         if (map.isEmpty())
