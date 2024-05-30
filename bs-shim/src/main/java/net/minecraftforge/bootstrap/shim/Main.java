@@ -29,7 +29,7 @@ public class Main {
         int wantedJavaVersion = Integer.parseInt(props.getProperty("Java-Version", "0"));
         int currentJavaVersion = getJavaVersion();
         if (wantedJavaVersion > currentJavaVersion)
-            throw new IllegalStateException("Current Java is " + System.getProperty("java.version") + " but we require at least " + wantedJavaVersion);
+            throw new IllegalStateException("Current Java is " + currentJavaVersion + " but we require at least " + wantedJavaVersion);
 
         if (args.length > 0 && args[0].equals("--onlyCheckJava"))
             System.exit(0);
