@@ -4,6 +4,7 @@
  */
 package net.minecraftforge.bootstrap.dev;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -67,7 +68,7 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
 
         var map = new HashMap<String, List<Path>>();
         var claimed = new HashSet<Path>();
-        for (var entry : mod_classes.split(";")) {
+        for (var entry : mod_classes.split(File.pathSeparator)) {
             if (entry.isBlank())
                 continue;
 
