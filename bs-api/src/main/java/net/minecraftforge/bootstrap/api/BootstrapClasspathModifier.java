@@ -6,7 +6,6 @@ package net.minecraftforge.bootstrap.api;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 /*
  * This is mean to allow modifications to the classpath before booting.

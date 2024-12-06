@@ -198,7 +198,7 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
                         lst.add(path);
                 } //else if (DEBUG) log("Unknown directory format: " + path);
             } else {
-                var module = Util.findModuleName(path, null);
+                var module = Util.findModuleNameImpl(path, false);
                 if (module.name() == null) {
                     //var meta = JarMetadata.fromFileName(path, Set.of(), List.of());
                     //module = new ModuleVersion(meta.name(), meta.version(), module.layer());
