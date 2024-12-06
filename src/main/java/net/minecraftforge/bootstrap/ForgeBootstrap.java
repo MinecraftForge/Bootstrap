@@ -27,7 +27,9 @@ public class ForgeBootstrap extends Bootstrap {
 
         var ret = new ArrayList<SecureJar>();
         var bootlayer = getClass().getModule().getLayer();
-        var width = jars.stream().mapToInt(j -> j.moduleDataProvider().name().length()).max().orElse(0) + 1;
+        int width = DEBUG
+                ? jars.stream().mapToInt(j -> j.moduleDataProvider().name().length()).max().orElse(0) + 1
+                : 0;
 
         if (DEBUG) log("Found classpath:");
         for (int x = 0; x < classpath.size(); x++) {
