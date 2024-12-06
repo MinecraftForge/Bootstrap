@@ -46,14 +46,12 @@ public class Main {
                 System.out.println("Loading classpath: ");
             String line = reader.readLine();
             while (line != null) {
-                String entryPath;
-                if (DEBUG) {
-                    ListEntry entry = ListEntry.from(line);
-                    entryPath = entry.path;
-                    System.out.println(entry);
-                } else {
-                    entryPath = ListEntry.getPathFrom(line);
-                }
+                String entryPath = ListEntry.getPathFrom(line);
+//                if (DEBUG) {
+//                    ListEntry entry = ListEntry.from(line);
+//                    entryPath = entry.path;
+//                    System.out.println(entry);
+//                }
                 File target = new File("libraries/"+ entryPath);
                 if (!target.exists()) {
                     System.out.println("Missing required library: " + entryPath);
