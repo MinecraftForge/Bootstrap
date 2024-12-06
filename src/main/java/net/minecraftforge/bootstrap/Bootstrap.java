@@ -206,7 +206,7 @@ public class Bootstrap {
         for (int x = 0; x < classpath.size(); x++) {
             var jar = jars.get(x);
             var name = jar.moduleDataProvider().name();
-            var paths = classpath.get(x);
+            Path[] paths = DEBUG ? classpath.get(x) : null;
 
             if (bootlayer.findModule(name).isPresent()) {
                 log("  Bootstrap: ", width, name, paths);
