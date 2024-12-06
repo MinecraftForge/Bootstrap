@@ -46,11 +46,17 @@ public class Main {
                 System.out.println("Loading classpath: ");
             String line = reader.readLine();
             while (line != null) {
-                ListEntry entry = ListEntry.from(line);
-                //System.out.println(entry);
-                File target = new File("libraries/"+ entry.path);
+                String entryPath;
+                if (DEBUG) {
+                    ListEntry entry = ListEntry.from(line);
+                    entryPath = entry.path;
+                    System.out.println(entry);
+                } else {
+                    entryPath = ListEntry.getPathFrom(line);
+                }
+                File target = new File("libraries/"+ entryPath);
                 if (!target.exists()) {
-                    System.out.println("Missing required library: " + entry.path);
+                    System.out.println("Missing required library: " + entryPath);
                     failed = true;
                 }
                 classpath.append(File.pathSeparator).append(target.getAbsolutePath());
@@ -128,8 +134,13 @@ public class Main {
         private final String path;
 
         private static ListEntry from(String line) {
-            String[] parts = line.split("\t", 3);
-            return new ListEntry(parts[0], parts[1], parts[2]);
+            String sha256 = line.substring(0, 64);
+            String[] parts = line.substring(65).split("\t", 2);
+            return new ListEntry(sha256, parts[0], parts[1]);
+        }
+
+        private static String getPathFrom(String line) {
+            return line.substring(65).split("\t", 2)[1];
         }
 
         private ListEntry(String sha256, String id, String path) {
