@@ -133,6 +133,7 @@ public class Main {
 
         private static ListEntry from(String line) {
             String sha256 = line.substring(0, 64);
+            if (line.charAt(65) != '\t') throw new IllegalArgumentException("Invalid bootstrap config line: " + line);
             String[] parts = line.substring(65).split("\t", 2);
             return new ListEntry(sha256, parts[0], parts[1]);
         }
