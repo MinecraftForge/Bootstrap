@@ -174,14 +174,6 @@ class Util {
         return mf != null && Boolean.parseBoolean(mf.getMainAttributes().getValue(MULTI_RELEASE));
     }
 
-    public static void main(String[] args) {
-        var p = Path.of("Z:\\Projects\\Forge_1214\\projects\\forge\\bin\\main");
-        for (int x = 0; x < 100; x++) {
-            var mod = findModuleName(p);
-            System.out.println(mod);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     static <E extends Throwable, R> R sneak(Exception exception) throws E {
         throw (E)exception;
