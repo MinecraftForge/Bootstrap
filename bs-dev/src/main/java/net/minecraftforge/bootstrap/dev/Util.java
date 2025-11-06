@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 import java.util.jar.Attributes.Name;
+import java.util.regex.Pattern;
 import java.util.jar.JarFile;
 
 class Util {
@@ -261,5 +263,60 @@ class Util {
         } catch (IOException e) {
             return sneak(e);
         }
+    }
+
+    public static ModuleVersion findAutomaticModuleName(Path[] paths) {
+        if (paths.length != 1 || paths[0].getFileName() == null)
+            return null;
+
+        var name = paths[0].getFileName().toString();
+        if (!name.endsWith(".jar"))
+            return null;
+
+        String version = null;
+        var matcher = Patterns.DASH_VERSION.matcher(name);
+        if (matcher.find()) {
+            int start = matcher.start();
+
+            // attempt to parse the tail as a version string
+            try {
+                String tail = name.substring(start + 1);
+                ModuleDescriptor.Version.parse(tail);
+                version = tail;
+            } catch (IllegalArgumentException ignore) { }
+
+            name = name.substring(0, start);
+        }
+
+        return new ModuleVersion(cleanModuleName(name), version, null);
+    }
+
+    // Stolen from jdk.internal.module.ModulePath
+    private static class Patterns {
+        static final Pattern DASH_VERSION = Pattern.compile("-(\\d+(\\.|$))");
+        static final Pattern NON_ALPHANUM = Pattern.compile("[^A-Za-z0-9]");
+        static final Pattern REPEATING_DOTS = Pattern.compile("(\\.)(\\1)+");
+        static final Pattern LEADING_DOTS = Pattern.compile("^\\.");
+        static final Pattern TRAILING_DOTS = Pattern.compile("\\.$");
+    }
+
+    // Stolen from jdk.internal.module.ModulePath
+    private static String cleanModuleName(String mn) {
+        // replace non-alphanumeric
+        mn = Patterns.NON_ALPHANUM.matcher(mn).replaceAll(".");
+
+        // collapse repeating dots
+        mn = Patterns.REPEATING_DOTS.matcher(mn).replaceAll(".");
+
+        // drop leading dots
+        if (!mn.isEmpty() && mn.charAt(0) == '.')
+            mn = Patterns.LEADING_DOTS.matcher(mn).replaceAll("");
+
+        // drop trailing dots
+        int len = mn.length();
+        if (len > 0 && mn.charAt(len-1) == '.')
+            mn = Patterns.TRAILING_DOTS.matcher(mn).replaceAll("");
+
+        return mn;
     }
 }

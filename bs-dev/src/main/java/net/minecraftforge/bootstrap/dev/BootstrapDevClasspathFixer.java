@@ -343,6 +343,10 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
         for (var itr = classpath.iterator(); itr.hasNext(); ) {
             var paths = itr.next();
             var module = Util.findModuleName(paths);
+
+            if (module == null)
+                module = Util.findAutomaticModuleName(paths);
+
             if (module != null && toIgnore.contains(module.name())) {
                 itr.remove();
                 ret = true;
