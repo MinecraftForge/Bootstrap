@@ -33,5 +33,12 @@ public interface BootstrapClasspathModifier {
      */
     boolean process(List<Path[]> classpath);
 
-
+    /**
+     * Used to modify or read the command line arguments passed to this process.
+     * This is called before {@link #process(List)} so that you can use this information to enhance your classpath.
+     * @return New arguments to be passed to the module main method, or the same instance as input to make no changes.
+     */
+    default String[] arguments(String[] args) {
+        return args;
+    }
 }

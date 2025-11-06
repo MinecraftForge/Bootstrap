@@ -46,6 +46,7 @@ public class Bootstrap {
             var service = itr.next();
             if (DEBUG)
                 log("Calling Service: " + service.name());
+            args = service.arguments(args);
             modified |= service.process(processed);
         }
 
