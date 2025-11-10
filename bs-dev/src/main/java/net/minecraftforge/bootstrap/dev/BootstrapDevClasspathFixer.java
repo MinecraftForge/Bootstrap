@@ -5,8 +5,6 @@
 package net.minecraftforge.bootstrap.dev;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,13 +16,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.minecraftforge.bootstrap.api.BootstrapClasspathModifier;
+import net.minecraftforge.bootstrap.api.Util;
 
 public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
     private static final boolean DEBUG    = Boolean.parseBoolean(System.getProperty("bsl.debug",        "false"));
     private static final boolean AUTO     = Boolean.parseBoolean(System.getProperty("bsl.dev.auto",     "true" ));
     private static final boolean EXPLICIT = Boolean.parseBoolean(System.getProperty("bsl.dev.explicit", "true" ));
-    private static final boolean IGNORE   = Boolean.parseBoolean(System.getProperty("bsl.dev.ignore",   "true" ));
-    private static final Path    IGNORE_FILE = Path.of("META-INF/forge-bootstrap-ignore");
 
     static void log(String message) {
         System.out.println(message);
@@ -44,9 +41,6 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
 
         if (AUTO)
             ret |= processAuto(classpath);
-
-        if (IGNORE)
-            ret |= processIgnore(classpath);
 
         return ret;
     }
@@ -198,7 +192,7 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
                         lst.add(path);
                 } //else if (DEBUG) log("Unknown directory format: " + path);
             } else {
-                var module = Util.findModuleNameImpl(path, false);
+                var module = Util.findModule(path);
                 if (module.name() == null) {
                     //var meta = JarMetadata.fromFileName(path, Set.of(), List.of());
                     //module = new ModuleVersion(meta.name(), meta.version(), module.layer());
@@ -221,7 +215,7 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
             var sources = sourcesets.get(prj);
             for (var source : sources.keySet()) {
                 var dirs = sources.get(source);
-                var module = Util.findModuleName(dirs);
+                var module = Util.findModule(dirs);
                 if (module == null) {
                     if (DEBUG) {
                         for (int x = 0; x < dirs.size(); x++) {
@@ -280,77 +274,6 @@ public class BootstrapDevClasspathFixer implements BootstrapClasspathModifier {
                 modified.add(module.paths.toArray(Path[]::new));
             classpath.clear();
             classpath.addAll(modified);
-        }
-
-        return ret;
-    }
-
-    /* A system to tell us to ignore certain modules completely.
-     * This is used by ForgeDev tests because we essentially have our own locator for those.
-     * We filter out mod files so *most* things should be fine. ForgeDev Tests are just weird.
-     */
-    private boolean processIgnore(List<Path[]> classpath) {
-        var toIgnore = new HashSet<String>();
-        for (var paths : classpath) {
-            var ignoreSelf = false;
-            for (var path : paths) {
-                if (!Files.isDirectory(path))
-                    continue;
-
-                var ignore = path.resolve(IGNORE_FILE);
-                if (Files.exists(ignore)) {
-                    if (DEBUG) log("Ingore File: " + ignore);
-                    var ignores = new ArrayList<String>();
-                    try {
-                        for (var line : Files.readAllLines(ignore, StandardCharsets.UTF_8)) {
-                            int idx = line.indexOf('#');
-                            if (idx != -1)
-                                line = line.substring(0, idx);
-                            line = line.trim();
-                            if (!line.isEmpty())
-                                ignores.add(line);
-                        }
-                    } catch (IOException e) {
-                        return Util.sneak(e);
-                    }
-
-                    if (ignores.isEmpty())
-                        ignoreSelf = true;
-
-                    for (var line : ignores) {
-                        if (DEBUG) log("\tIgnoring: " + line);
-                        toIgnore.add(line);
-                    }
-                }
-            }
-
-            if (ignoreSelf) {
-                var module = Util.findModuleName(paths);
-                if (module == null) {
-                    log("\tInvalid Ignore File, could not find module name:");
-                    for (var path : paths)
-                        log("\t\t" + path);
-                } else {
-                    toIgnore.add(module.name());
-                }
-            }
-        }
-
-        if (toIgnore.isEmpty())
-            return false;
-
-        var ret = false;
-        for (var itr = classpath.iterator(); itr.hasNext(); ) {
-            var paths = itr.next();
-            var module = Util.findModuleName(paths);
-
-            if (module == null)
-                module = Util.findAutomaticModuleName(paths);
-
-            if (module != null && toIgnore.contains(module.name())) {
-                itr.remove();
-                ret = true;
-            }
         }
 
         return ret;
