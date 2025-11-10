@@ -4,8 +4,12 @@
  */
 package net.minecraftforge.bootstrap.prod;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +21,7 @@ import net.minecraftforge.bootstrap.api.Util;
 public class BootstrapProdClasspathFixer implements BootstrapClasspathModifier {
     private static final boolean DEBUG    = Boolean.parseBoolean(System.getProperty("bsl.debug",        "false"));
     private static final boolean IGNORE   = Boolean.parseBoolean(System.getProperty("bsl.dev.ignore",   "true" ));
-    private static final Path    IGNORE_FILE = Path.of("META-INF/forge-bootstrap-ignore");
+    private static final String  IGNORE_FILE = "META-INF/forge-bootstrap-ignore";
 
     static void log(String message) {
         System.out.println(message);
@@ -47,15 +51,37 @@ public class BootstrapProdClasspathFixer implements BootstrapClasspathModifier {
         for (var paths : classpath) {
             var ignoreSelf = false;
             for (var path : paths) {
-                if (!Files.isDirectory(path))
-                    continue;
+                byte[] data = null;
 
-                var ignore = path.resolve(IGNORE_FILE);
-                if (Files.exists(ignore)) {
-                    if (DEBUG) log("Ingore File: " + ignore);
+                if (Files.isDirectory(path)) {
+                    var ignore = path.resolve(IGNORE_FILE);
+                    if (Files.exists(ignore)) {
+                        if (DEBUG) log("Ingore File: " + ignore);
+                        try {
+                            data = Files.readAllBytes(ignore);
+                        } catch (IOException e) {
+                            sneak(e);
+                        }
+                    }
+                } else {
+                    try (var fs = FileSystems.newFileSystem(path)) {
+                        var root = fs.getRootDirectories().iterator().next();
+                        var ignore = root.resolve(IGNORE_FILE);
+
+                        if (Files.exists(ignore)) {
+                            if (DEBUG) log("Ingore File: " + path + "!/" + ignore);
+                            data = Files.readAllBytes(ignore);
+                        }
+                    } catch (IOException e) {
+                        sneak(e);
+                    }
+                }
+
+                if (data != null) {
                     var ignores = new ArrayList<String>();
-                    try {
-                        for (var line : Files.readAllLines(ignore, StandardCharsets.UTF_8)) {
+                    try (var reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data), StandardCharsets.UTF_8.newDecoder()))) {
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
                             int idx = line.indexOf('#');
                             if (idx != -1)
                                 line = line.substring(0, idx);
@@ -64,7 +90,7 @@ public class BootstrapProdClasspathFixer implements BootstrapClasspathModifier {
                                 ignores.add(line);
                         }
                     } catch (IOException e) {
-                        return sneak(e);
+                        sneak(e);
                     }
 
                     if (ignores.isEmpty())
